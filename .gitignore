@@ -1,1 +1,5 @@
 build
+*.v
+*.json
+*.data
+*.key
