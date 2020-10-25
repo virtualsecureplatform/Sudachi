@@ -28,18 +28,18 @@ namespace YosysJSONparser{
 
     ParsedBC::ParsedBC(const std::string &jsonstring){
         uint gate_index = 1;
-        const nlohmann::json& jsonnetlist = nlohmann::json::parse(jsonstring)["modules"];
-        for( const nlohmann::json & module : jsonnetlist){
+        const nlohmann::json& jsonnetlist = nlohmann::json::parse(jsonstring);
+        for( const nlohmann::json & module : jsonnetlist["modules"]){
             for(const nlohmann::json & port_json : module["ports"]){
                 const std::string& direction = port_json["direction"].get<std::string>();
-                if (direction == "input") for( const uint & bit: port_json["bits"]) input_vector.push_back(bit);
-                else if (direction == "output") for( const uint & bit: port_json["bits"]) output_vector.push_back(bit);
+                if (direction == "input") for( const int & bit: port_json["bits"].get<std::vector<int>>()) input_vector.push_back(bit);
+                else if (direction == "output") for( const int & bit: port_json["bits"].get<std::vector<int>>()) output_vector.push_back(bit);
                 else{std::cout<<"Port Definition Error"<<std::endl;throw 1;}
             }
 
             for(const nlohmann::json & cell_json : module["cells"]){
                 std::string gate_name = cell_json["type"].get<std::string>();
-                gate_name.erase(gate_name.begin(), gate_name.begin() + 1);
+                gate_name.erase(gate_name.begin(), gate_name.begin() + 2);
                 gate_name.pop_back();
                 if(gate_name == "ANDNOT") gate_name = "ANDYN"; //Yosys"s ANDNOT is equivalent to TFHE"s ANDYN
                 else if(gate_name == "ORNOT") gate_name = "ORYN"; //Yosys"s ORNOT is equivalent to TFHE"s ORYN
@@ -53,21 +53,26 @@ namespace YosysJSONparser{
                     DFF_vector.push_back(dff_pair);
                 }
                 else{
-                    if(gate_vector.size()<gate_index)dependency_vector.resize(gate_index);
+                    if(gate_vector.size()<gate_index)gate_vector.resize(gate_index);
                     gate_vector[gate_index-1].name = gate_name;
 
-                    const uint output_bit = cell_json["connections"]["Y"][0];
+                    const uint output_bit = cell_json["connections"]["Y"][0].get<uint>();
                     gate_vector[gate_index-1].out = output_bit;
                     if(std::find(output_vector.begin(),output_vector.end(),output_bit)==output_vector.end() && std::find(wire_vector.begin(),wire_vector.end(),output_bit)==wire_vector.end()) wire_vector.push_back(output_bit);
                     if(dependency_vector.size()<=output_bit)dependency_vector.resize(output_bit+1);
                     dependency_vector[output_bit]=gate_index;
-                    gate_vector[gate_index-1].in[0] = cell_json["connections"]["A"][0];
+                    gate_vector[gate_index-1].in[0] = cell_json["connections"]["A"][0].get<uint>();
                     if (gate_name!="NOT") {
-                        gate_vector[gate_index-1].in[1] = cell_json["connections"]["B"][0];
-                        if  (gate_name=="MUX") gate_vector[gate_index-1].in[2] = cell_json["connections"]["S"][0];
+                        gate_vector[gate_index-1].in[1] = cell_json["connections"]["B"][0].get<uint>();
+                        if  (gate_name=="MUX") gate_vector[gate_index-1].in[2] = cell_json["connections"]["S"][0].get<uint>();
                     }
+                    gate_index++;
                 }
             }
         }
+        //for convinience
+        std::sort(input_vector.begin(),input_vector.end());
+        std::sort(output_vector.begin(),output_vector.end());
+        std::sort(wire_vector.begin(),wire_vector.end());
     }
 }

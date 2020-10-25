@@ -9,5 +9,4 @@ target_include_directories(sudachi
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/thirdparties/taskflow
   ${PROJECT_SOURCE_DIR}/thirdparties/json/single_include
-  ${PROJECT_SOURCE_DIR}/thirdparties/crc32
   )

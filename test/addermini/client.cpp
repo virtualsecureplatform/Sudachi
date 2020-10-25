@@ -2,6 +2,9 @@
 #include <fstream>
 #include <memory>
 #include <vector>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/vector.hpp>
+#include <random>
 
 int main() {
     //generate a random key
@@ -23,11 +26,18 @@ int main() {
     };
    
     //generate encrypt the input
-    constexpr int8_t plaintext = 0b111100;//in_b,in_a,reset,clock
+    std::random_device seed_gen;
+    std::default_random_engine engine(seed_gen());
+    std::uniform_int_distribution<> inrand(0, 3);
+    int ina = inrand(engine); 
+    int inb = inrand(engine); 
+    std::cout<<ina<<std::endl;
+    std::cout<<inb<<std::endl;
     std::vector<uint8_t> p(6);
-    for (int i=0; i<6; i++) {
-        p[i] = (plaintext>>i)&1;
-    }
+    p[2] = ina&1;
+    p[3] = (ina>>1)&1;
+    p[4] = inb&1;
+    p[5] = (inb>>1)&1;
     std::vector<TFHEpp::TLWElvl0> ciphertext = TFHEpp::bootsSymEncrypt(p, *sk);
 
     //export the 6 ciphertexts to a file (for the cloud)

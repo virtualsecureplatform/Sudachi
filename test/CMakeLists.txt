@@ -1,5 +1,16 @@
-file(GLOB test_directories "*")
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+      LIST(APPEND dirlist ${child})
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
+
+SUBDIRLIST(test_directories ${CMAKE_CURRENT_LIST_DIR})
 
 foreach(test_directory ${test_directories})
-    add_subdirectory(test_directory)
+    add_subdirectory(${test_directory})
 endforeach(test_directory ${test_directories})

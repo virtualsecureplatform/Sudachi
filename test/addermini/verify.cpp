@@ -1,7 +1,8 @@
 #include <tfhe++.hpp>
-#include <stdio.h>
 #include <fstream>
 #include <iostream>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/vector.hpp>
 int main() {
 
     //reads the cloud key from file
@@ -23,9 +24,9 @@ int main() {
 
     //decrypt and print plaintext answer
     std::vector<uint8_t>p = bootsSymDecrypt(result, sk);
-    int16_t int_answer = 0;
+    int int_answer = 0;
     for (int i=0; i<3; i++) {
-        int int_answer = p[i]<<i;
+        int_answer += p[i]<<i;
     }
     std::cout<<int_answer<<std::endl;
 }
