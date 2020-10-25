@@ -11,6 +11,7 @@
 #include <cereal/types/vector.hpp>
 
 int main (int argc, char* argv[]){
+    //To see performance
     std::chrono::system_clock::time_point start, end; 
     start = std::chrono::system_clock::now();
 
@@ -24,17 +25,19 @@ int main (int argc, char* argv[]){
     ifs.close();
     const YosysJSONparser::ParsedBC BCnetlist(json);
 
-    // Allocate vectors
+    // Allocate vectors which holds ciphertexts
     std::vector<TFHEpp::TLWElvl0> cipherin(BCnetlist.input_vector.size());
     std::vector<TFHEpp::TLWElvl0> cipherout(BCnetlist.output_vector.size());
     std::vector<TFHEpp::TLWElvl0> cipherwire(BCnetlist.wire_vector.size());
 
+    //Read input ciphertexts
     {
         std::ifstream ifs("./cloud.data", std::ios::binary);
         cereal::PortableBinaryInputArchive ar(ifs);
         ar(cipherin);
     }
 
+    //To avoid stack limitation, GateKey should be allocated like this
     std::unique_ptr<TFHEpp::GateKey> gk(new TFHEpp::GateKey());
 
     //reads the cloud key from file
@@ -45,7 +48,7 @@ int main (int argc, char* argv[]){
         gk->serialize(ar);
     }
 
-    //Generaete tasks for Cpp Taskflow
+    // These hold infomations about a task network
     tf::Executor executor;
     tf::Taskflow taskflow;
     std::vector<tf::Task> gatetasknet(BCnetlist.gate_vector.size());
@@ -54,6 +57,7 @@ int main (int argc, char* argv[]){
     std::vector<std::vector<TFHEpp::TLWElvl0>::const_iterator> inbcipher_vector(BCnetlist.gate_vector.size());
     std::vector<std::vector<TFHEpp::TLWElvl0>::const_iterator> inscipher_vector(BCnetlist.gate_vector.size());
 
+    //Generaete tasks for Cpp Taskflow
     for(int gate_index = 1; gate_index<=BCnetlist.gate_vector.size();gate_index++){
         const YosysJSONparser::GateStruct& gate = BCnetlist.gate_vector[gate_index-1];
         const std::vector<uint>::const_iterator outiterator =  std::find(BCnetlist.output_vector.begin(),BCnetlist.output_vector.end(),gate.out);
@@ -67,6 +71,7 @@ int main (int argc, char* argv[]){
         else inacipher = cipherwire.begin()+std::distance(BCnetlist.wire_vector.begin(),std::find(BCnetlist.wire_vector.begin(),BCnetlist.wire_vector.end(),gate.in[0]));
 
         if(gate.name == "NOT") {
+            // 1 input gate
             gatetasknet[gate_index-1] = taskflow.emplace([&](){ TFHEpp::HomNOT(*outcipher,*inacipher);});
             continue;
         }
@@ -75,6 +80,7 @@ int main (int argc, char* argv[]){
         if(initerator1 != BCnetlist.input_vector.end()) inbcipher = cipherin.begin()+std::distance(BCnetlist.input_vector.begin(),initerator1);
         else inbcipher = cipherwire.begin()+std::distance(BCnetlist.wire_vector.begin(),std::find(BCnetlist.wire_vector.begin(),BCnetlist.wire_vector.end(),gate.in[1]));
         if(gate.name!="MUX"){
+            //2 input gates
             if(gate.name=="NAND")
                 gatetasknet[gate_index-1] = taskflow.emplace([&](){ TFHEpp::HomNAND(*outcipher,*inacipher,*inbcipher,*gk);});
             else if(gate.name=="NOR")
@@ -97,6 +103,7 @@ int main (int argc, char* argv[]){
                 continue;
             }
         }else{
+            //3 input gate, MUX
             const std::vector<uint>::const_iterator initerator2 =  std::find(BCnetlist.input_vector.begin(),BCnetlist.input_vector.end(),gate.in[2]);
             std::vector<TFHEpp::TLWElvl0>::const_iterator& inscipher = inscipher_vector[gate_index-1];
             if(initerator2 != BCnetlist.input_vector.end()) inscipher = cipherin.begin()+std::distance(BCnetlist.input_vector.begin(),initerator2);
@@ -106,7 +113,6 @@ int main (int argc, char* argv[]){
     }
 
     // Construct task network for Cpp Taskflow
-    
     tf::Task finishtask = taskflow.emplace([](){static uint cycle = 1; std::cout<<"Finished cycle "<<cycle<<std::endl; cycle++;});
     
     for(int gate_index = 1; gate_index<=BCnetlist.gate_vector.size();gate_index++){
@@ -130,6 +136,7 @@ int main (int argc, char* argv[]){
         dfftasknet[dff_index].precede(finishtask);
     }
 
+    //Get how many clock this circuit should be evaluated.
     int number_of_clock;
     if(argc == 1){
         number_of_clock = 1;

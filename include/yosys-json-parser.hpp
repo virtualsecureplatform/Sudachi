@@ -6,9 +6,12 @@
 #include <iostream>
 #include <algorithm>
 
+// Parse JSON netlist
 namespace YosysJSONparser{
+    // Assuming there is a limit of a number of inputs for each gate.
     constexpr uint MAX_NUM_INPUT = 3;
 
+    //Holding information of each gate
     struct GateStruct{
         std::string name;
         std::array<uint,MAX_NUM_INPUT> in;
@@ -22,6 +25,7 @@ namespace YosysJSONparser{
         std::vector<GateStruct> gate_vector;
         std::vector<std::array<uint,2>> DFF_vector;
         std::vector<std::array<uint,2>> direct_port_pair_vector;
+        //Because input ports, output ports and wires have unique index, we can hold the information about which gate output to specific wires or output ports by this vector.
         std::vector<uint> dependency_vector;
         ParsedBC(const std::string &);
     };
