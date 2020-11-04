@@ -21,9 +21,10 @@ namespace YosysJSONparser{
     struct ParsedBC{
         std::vector<uint> input_vector;
         std::vector<uint> output_vector;
+        std::vector<uint> DFF_Q_vector;
+        std::vector<uint> DFF_D_vector;
         std::vector<uint> wire_vector;
         std::vector<GateStruct> gate_vector;
-        std::vector<std::array<uint,2>> DFF_vector;
         std::vector<std::array<uint,2>> direct_port_pair_vector;
         //Because input ports, output ports and wires have unique index, we can hold the information about which gate output to specific wires or output ports by this vector.
         std::vector<uint> dependency_vector;
@@ -49,12 +50,8 @@ namespace YosysJSONparser{
                 else if(gate_name == "ORNOT") gate_name = "ORYN"; //Yosys"s ORNOT is equivalent to TFHE"s ORYN
 
                 if(gate_name == "DFF_P"){
-                    const uint input_bit = cell_json["connections"]["D"][0].get<uint>();
-                    const uint output_bit = cell_json["connections"]["Q"][0].get<uint>();
-                    input_vector.push_back(input_bit);
-                    output_vector.push_back(output_bit);
-                    std::array<uint,2> dff_pair = {input_bit,output_bit};
-                    DFF_vector.push_back(dff_pair);
+                    DFF_Q_vector.push_back(cell_json["connections"]["Q"][0].get<uint>());
+                    DFF_D_vector.push_back(cell_json["connections"]["D"][0].get<uint>());
                 }
                 else{
                     if(gate_vector.size()<gate_index)gate_vector.resize(gate_index);
@@ -74,6 +71,13 @@ namespace YosysJSONparser{
                 }
             }
         }
+        
+        //If DFF's Q port is connected to output, needs copy at last.
+        for(int i = 0; i<DFF_Q_vector.size();i++){
+            const std::vector<uint>::iterator output_itr = std::find(output_vector.begin(),output_vector.end(),DFF_Q_vector[i]);
+            if(output_itr!=output_vector.end()) direct_port_pair_vector.push_back({DFF_Q_vector[i],*output_itr});
+        } 
+
         //for convinience
         std::sort(input_vector.begin(),input_vector.end());
         std::sort(output_vector.begin(),output_vector.end());
