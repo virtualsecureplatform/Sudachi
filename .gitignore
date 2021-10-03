@@ -3,6 +3,7 @@ build
 *.json
 *.data
 *.key
+*.fir
 target
 project
 .vscode
