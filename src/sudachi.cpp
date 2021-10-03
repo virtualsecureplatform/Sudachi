@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
     const YosysJSONparser::ParsedBC BCnetlist(json);
 
     // Allocate vectors which holds ciphertexts
-    std::vector<TFHEpp::TLWElvl0> cipherin(BCnetlist.input_vector.size());
-    std::vector<TFHEpp::TLWElvl0> cipherout(BCnetlist.output_vector.size());
-    std::vector<TFHEpp::TLWElvl0> cipherdffq(BCnetlist.DFF_Q_vector.size());
-    std::vector<TFHEpp::TLWElvl0> cipherdffd(BCnetlist.DFF_D_vector.size());
-    std::vector<TFHEpp::TLWElvl0> cipherwire(BCnetlist.wire_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherin(BCnetlist.input_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherout(BCnetlist.output_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherdffq(BCnetlist.DFF_Q_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherdffd(BCnetlist.DFF_D_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherwire(BCnetlist.wire_vector.size());
 
     // Read input ciphertexts
     {
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     std::vector<tf::Task> gatetasknet(BCnetlist.gate_vector.size());
 
     // Initialize registers by 0
-    for (TFHEpp::TLWElvl0 &dffq : cipherdffq) TFHEpp::HomCONSTANTZERO(dffq);
+    for (TFHEpp::TLWE<TFHEpp::lvl0param> &dffq : cipherdffq) TFHEpp::HomCONSTANTZERO(dffq);
 
     // Generaete tasks for Cpp Taskflow
     for (int gate_index = 1; gate_index <= BCnetlist.gate_vector.size();
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         const std::vector<uint>::const_iterator wireiterator =
             std::find(BCnetlist.wire_vector.begin(),
                       BCnetlist.wire_vector.end(), gate.out);
-        std::vector<TFHEpp::TLWElvl0>::iterator outcipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::iterator outcipher;
         if (dffditerator != BCnetlist.DFF_D_vector.end())
             outcipher =
                 cipherdffd.begin() +
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         const std::vector<uint>::const_iterator wireiterator0 =
             std::find(BCnetlist.wire_vector.begin(),
                       BCnetlist.wire_vector.end(), gate.in[0]);
-        std::vector<TFHEpp::TLWElvl0>::const_iterator inacipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inacipher;
         if (initerator0 != BCnetlist.input_vector.end())
             inacipher =
                 cipherin.begin() +
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
         const std::vector<uint>::const_iterator wireiterator1 =
             std::find(BCnetlist.wire_vector.begin(),
                       BCnetlist.wire_vector.end(), gate.in[1]);
-        std::vector<TFHEpp::TLWElvl0>::const_iterator inbcipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inbcipher;
         if (initerator1 != BCnetlist.input_vector.end())
             inbcipher =
                 cipherin.begin() +
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
         else
             std::cout << "in1 bit parse error" << std::endl;
 
-        if (gate.name != "MUX") {
+        if (gate.name != "MUX" || gate.name != "NMUX") {
             // 2 input gates
             if (gate.name == "NAND")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
             }
         }
         else {
-            // 3 input gate, MUX
+            // 3 input gate, MUX or NMUX
             const std::vector<uint>::const_iterator initerator2 =
                 std::find(BCnetlist.input_vector.begin(),
                           BCnetlist.input_vector.end(), gate.in[2]);
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
             const std::vector<uint>::const_iterator wireiterator2 =
                 std::find(BCnetlist.wire_vector.begin(),
                           BCnetlist.wire_vector.end(), gate.in[2]);
-            std::vector<TFHEpp::TLWElvl0>::const_iterator inscipher;
+            std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inscipher;
             if (initerator2 != BCnetlist.input_vector.end())
                 inscipher =
                     cipherin.begin() +
@@ -214,11 +214,16 @@ int main(int argc, char *argv[])
                     std::distance(BCnetlist.wire_vector.begin(), wireiterator2);
             else
                 std::cout << "ins bit parse error" << std::endl;
-
-            gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                TFHEpp::HomMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
-                               *gk);
-            });
+            if (gate.name == "MUX")
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
+                    TFHEpp::HomMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
+                                *gk);
+                });
+            else
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
+                    TFHEpp::HomNMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
+                                *gk);
+                });;
         }
     }
 
@@ -236,7 +241,7 @@ int main(int argc, char *argv[])
         int num_input = 2;
         if (gate.name == "NOT")
             num_input = 1;
-        else if (gate.name == "MUX")
+        else if (gate.name == "MUX" || gate.name == "NMUX")
             num_input = 3;
         for (int i = 0; i < num_input; i++) {
             const int depend_gate = BCnetlist.dependency_vector[gate.in[i]];

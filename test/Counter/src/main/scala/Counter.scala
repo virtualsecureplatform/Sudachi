@@ -19,6 +19,6 @@ class Counter extends Module {
 
 }
 
-object Elaborate extends App {
-  chisel3.Driver.execute(args, () => new Counter())
+object CounterTop extends App {
+  (new chisel3.stage.ChiselStage).emitVerilog(new Counter())
 }

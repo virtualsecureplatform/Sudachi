@@ -6,8 +6,4 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-val chiselGroupId = "edu.berkeley.cs"
-libraryDependencies ++= Seq(
-  chiselGroupId %% "chisel3" % "3.4.+",
-  chiselGroupId %% "chisel-iotesters" % "1.5.+"
-)
+libraryDependencies += "edu.berkeley.cs" %% "chisel3" % "3.4.3"

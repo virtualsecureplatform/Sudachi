@@ -64,7 +64,7 @@ ParsedBC::ParsedBC(const std::string &jsonstring)
                 gate_name = "ORYN";  // Yosys"s ORNOT is equivalent to TFHE"s
                                      // ORYN
 
-            if (gate_name == "DFF_P") {
+            if (gate_name == "SDFF_PP0") {
                 DFF_Q_vector.push_back(
                     cell_json["connections"]["Q"][0].get<uint>());
                 DFF_D_vector.push_back(
@@ -91,7 +91,7 @@ ParsedBC::ParsedBC(const std::string &jsonstring)
                 if (gate_name != "NOT") {
                     gate_vector[gate_index - 1].in[1] =
                         cell_json["connections"]["B"][0].get<uint>();
-                    if (gate_name == "MUX")
+                    if (gate_name == "MUX" || gate_name == "NMUX")
                         gate_vector[gate_index - 1].in[2] =
                             cell_json["connections"]["S"][0].get<uint>();
                 }

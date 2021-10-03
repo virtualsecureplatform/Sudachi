@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_FLAGS "-march=native -O3 -std=c++17")
+set(CMAKE_CXX_FLAGS "-march=native -O3 -g -std=c++17")
 project(sudachi CXX)
 
 #For Taskflow

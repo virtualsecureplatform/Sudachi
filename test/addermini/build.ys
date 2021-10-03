@@ -11,7 +11,7 @@ proc; opt; fsm; opt; memory; opt
 techmap; opt
 
 # mapping logic to gates.
-abc -g gates,MUX
+abc -g gates,MUX,NMUX
 
 # cleanup
 clean -purge
