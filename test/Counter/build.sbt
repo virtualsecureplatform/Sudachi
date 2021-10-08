@@ -1,4 +1,4 @@
-scalaVersion := "2.12.12"
+scalaVersion := "2.12.13"
 scalacOptions ++= Seq("-Xsource:2.11")
 
 resolvers ++= Seq(
