@@ -34,7 +34,8 @@ int main()
     std::cin >> plaintext;
     std::vector<uint8_t> p(6);
     for (int i = 0; i < 4; i++) p[i + 2] = (plaintext >> i) & 1;
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> ciphertext = TFHEpp::bootsSymEncrypt(p, *sk);
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> ciphertext =
+        TFHEpp::bootsSymEncrypt(p, *sk);
 
     // export the 6 ciphertexts to a file (for the cloud)
     {

@@ -22,7 +22,8 @@ int main()
     };
 
     // decrypt and print plaintext answer
-    std::vector<uint8_t> p = TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
+    std::vector<uint8_t> p =
+        TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
     int int_answer = 0;
     for (int i = 0; i < 17; i++) {
         int_answer += p[i] << i;

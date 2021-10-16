@@ -1,4 +1,5 @@
 #include <bits/stdint-uintn.h>
+
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/vector.hpp>
 #include <fstream>
@@ -23,7 +24,8 @@ int main()
     };
 
     // decrypt and print plaintext answer
-    std::vector<uint8_t> p = TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
+    std::vector<uint8_t> p =
+        TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
     uint32_t int_answer = 0;
     for (int i = 0; i < 32; i++) {
         int_answer += p[i] << i;

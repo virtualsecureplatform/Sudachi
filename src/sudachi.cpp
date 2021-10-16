@@ -29,11 +29,16 @@ int main(int argc, char *argv[])
     const YosysJSONparser::ParsedBC BCnetlist(json);
 
     // Allocate vectors which holds ciphertexts
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherin(BCnetlist.input_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherout(BCnetlist.output_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffq(BCnetlist.DFF_Q_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffd(BCnetlist.DFF_D_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherwire(BCnetlist.wire_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherin(
+        BCnetlist.input_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherout(
+        BCnetlist.output_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffq(
+        BCnetlist.DFF_Q_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffd(
+        BCnetlist.DFF_D_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherwire(
+        BCnetlist.wire_vector.size());
 
     // Read input ciphertexts
     {
@@ -58,7 +63,8 @@ int main(int argc, char *argv[])
     std::vector<tf::Task> gatetasknet(BCnetlist.gate_vector.size());
 
     // Initialize registers by 0
-    for (TFHEpp::TLWE<TFHEpp::lvl1param> &dffq : cipherdffq) TFHEpp::HomCONSTANTZERO(dffq);
+    for (TFHEpp::TLWE<TFHEpp::lvl1param> &dffq : cipherdffq)
+        TFHEpp::HomCONSTANTZERO(dffq);
 
     // Generaete tasks for Cpp Taskflow
     for (int gate_index = 1; gate_index <= BCnetlist.gate_vector.size();
@@ -69,13 +75,13 @@ int main(int argc, char *argv[])
         {
             const std::vector<uint>::const_iterator outiterator =
                 std::find(BCnetlist.output_vector.begin(),
-                        BCnetlist.output_vector.end(), gate.out);
+                          BCnetlist.output_vector.end(), gate.out);
             const std::vector<uint>::const_iterator dffditerator =
                 std::find(BCnetlist.DFF_D_vector.begin(),
-                        BCnetlist.DFF_D_vector.end(), gate.out);
+                          BCnetlist.DFF_D_vector.end(), gate.out);
             const std::vector<uint>::const_iterator wireiterator =
                 std::find(BCnetlist.wire_vector.begin(),
-                        BCnetlist.wire_vector.end(), gate.out);
+                          BCnetlist.wire_vector.end(), gate.out);
             if (dffditerator != BCnetlist.DFF_D_vector.end())
                 outcipher =
                     cipherdffd.begin() +
@@ -94,33 +100,33 @@ int main(int argc, char *argv[])
         std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator inacipher;
         {
             const std::vector<uint>::const_iterator outiterator0 =
-                    std::find(BCnetlist.output_vector.begin(),
-                            BCnetlist.output_vector.end(), gate.in[0]);
+                std::find(BCnetlist.output_vector.begin(),
+                          BCnetlist.output_vector.end(), gate.in[0]);
             const std::vector<uint>::const_iterator initerator0 =
                 std::find(BCnetlist.input_vector.begin(),
-                        BCnetlist.input_vector.end(), gate.in[0]);
+                          BCnetlist.input_vector.end(), gate.in[0]);
             const std::vector<uint>::const_iterator dffqiterator0 =
                 std::find(BCnetlist.DFF_Q_vector.begin(),
-                        BCnetlist.DFF_Q_vector.end(), gate.in[0]);
+                          BCnetlist.DFF_Q_vector.end(), gate.in[0]);
             const std::vector<uint>::const_iterator wireiterator0 =
                 std::find(BCnetlist.wire_vector.begin(),
-                        BCnetlist.wire_vector.end(), gate.in[0]);
+                          BCnetlist.wire_vector.end(), gate.in[0]);
             if (initerator0 != BCnetlist.input_vector.end())
                 inacipher =
                     cipherin.begin() +
                     std::distance(BCnetlist.input_vector.begin(), initerator0);
             else if (dffqiterator0 != BCnetlist.DFF_Q_vector.end())
-                inacipher =
-                    cipherdffq.begin() +
-                    std::distance(BCnetlist.DFF_Q_vector.begin(), dffqiterator0);
+                inacipher = cipherdffq.begin() +
+                            std::distance(BCnetlist.DFF_Q_vector.begin(),
+                                          dffqiterator0);
             else if (wireiterator0 != BCnetlist.wire_vector.end())
                 inacipher =
                     cipherwire.begin() +
                     std::distance(BCnetlist.wire_vector.begin(), wireiterator0);
             else if (outiterator0 != BCnetlist.output_vector.end())
-                inacipher =
-                    cipherout.begin() +
-                    std::distance(BCnetlist.output_vector.begin(), outiterator0);
+                inacipher = cipherout.begin() +
+                            std::distance(BCnetlist.output_vector.begin(),
+                                          outiterator0);
             else
                 std::cout << "in0 bit parse error" << std::endl;
         }
@@ -135,34 +141,34 @@ int main(int argc, char *argv[])
         {
             const std::vector<uint>::const_iterator outiterator1 =
                 std::find(BCnetlist.output_vector.begin(),
-                        BCnetlist.output_vector.end(), gate.in[1]);
+                          BCnetlist.output_vector.end(), gate.in[1]);
             const std::vector<uint>::const_iterator initerator1 =
                 std::find(BCnetlist.input_vector.begin(),
-                        BCnetlist.input_vector.end(), gate.in[1]);
+                          BCnetlist.input_vector.end(), gate.in[1]);
             const std::vector<uint>::const_iterator dffqiterator1 =
                 std::find(BCnetlist.DFF_Q_vector.begin(),
-                        BCnetlist.DFF_Q_vector.end(), gate.in[1]);
+                          BCnetlist.DFF_Q_vector.end(), gate.in[1]);
             const std::vector<uint>::const_iterator wireiterator1 =
                 std::find(BCnetlist.wire_vector.begin(),
-                        BCnetlist.wire_vector.end(), gate.in[1]);
+                          BCnetlist.wire_vector.end(), gate.in[1]);
             if (initerator1 != BCnetlist.input_vector.end())
                 inbcipher =
                     cipherin.begin() +
                     std::distance(BCnetlist.input_vector.begin(), initerator1);
             else if (dffqiterator1 != BCnetlist.DFF_Q_vector.end())
-                inbcipher =
-                    cipherdffq.begin() +
-                    std::distance(BCnetlist.DFF_Q_vector.begin(), dffqiterator1);
+                inbcipher = cipherdffq.begin() +
+                            std::distance(BCnetlist.DFF_Q_vector.begin(),
+                                          dffqiterator1);
             else if (wireiterator1 != BCnetlist.wire_vector.end())
                 inbcipher =
                     cipherwire.begin() +
                     std::distance(BCnetlist.wire_vector.begin(), wireiterator1);
             else if (outiterator1 != BCnetlist.output_vector.end())
-                inbcipher =
-                    cipherout.begin() +
-                    std::distance(BCnetlist.output_vector.begin(), outiterator1);
+                inbcipher = cipherout.begin() +
+                            std::distance(BCnetlist.output_vector.begin(),
+                                          outiterator1);
             else
-                std::cout << "in1 bit parse error :"<< gate.in[1] << std::endl;
+                std::cout << "in1 bit parse error :" << gate.in[1] << std::endl;
         }
         if (gate.name != "MUX" && gate.name != "NMUX") {
             // 2 input gates
@@ -206,48 +212,49 @@ int main(int argc, char *argv[])
         }
         else {
             // 3 input gate, MUX or NMUX
-            std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator inscipher;
+            std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inscipher;
             {
                 const std::vector<uint>::const_iterator outiterator2 =
                     std::find(BCnetlist.output_vector.begin(),
-                            BCnetlist.output_vector.end(), gate.in[2]);
+                              BCnetlist.output_vector.end(), gate.in[2]);
                 const std::vector<uint>::const_iterator initerator2 =
                     std::find(BCnetlist.input_vector.begin(),
-                            BCnetlist.input_vector.end(), gate.in[2]);
+                              BCnetlist.input_vector.end(), gate.in[2]);
                 const std::vector<uint>::const_iterator dffqiterator2 =
                     std::find(BCnetlist.DFF_Q_vector.begin(),
-                            BCnetlist.DFF_Q_vector.end(), gate.in[2]);
+                              BCnetlist.DFF_Q_vector.end(), gate.in[2]);
                 const std::vector<uint>::const_iterator wireiterator2 =
                     std::find(BCnetlist.wire_vector.begin(),
-                            BCnetlist.wire_vector.end(), gate.in[2]);
+                              BCnetlist.wire_vector.end(), gate.in[2]);
                 if (initerator2 != BCnetlist.input_vector.end())
-                    inscipher =
-                        cipherin.begin() +
-                        std::distance(BCnetlist.input_vector.begin(), initerator2);
+                    inscipher = cipherin.begin() +
+                                std::distance(BCnetlist.input_vector.begin(),
+                                              initerator2);
                 else if (dffqiterator2 != BCnetlist.DFF_Q_vector.end())
                     inscipher = cipherdffq.begin() +
                                 std::distance(BCnetlist.DFF_Q_vector.begin(),
-                                            dffqiterator2);
+                                              dffqiterator2);
                 else if (wireiterator2 != BCnetlist.wire_vector.end())
-                    inscipher =
-                        cipherwire.begin() +
-                        std::distance(BCnetlist.wire_vector.begin(), wireiterator2);
+                    inscipher = cipherwire.begin() +
+                                std::distance(BCnetlist.wire_vector.begin(),
+                                              wireiterator2);
                 else if (outiterator2 != BCnetlist.output_vector.end())
-                    inscipher =
-                        cipherout.begin() +
-                        std::distance(BCnetlist.output_vector.begin(), outiterator2);
+                    inscipher = cipherout.begin() +
+                                std::distance(BCnetlist.output_vector.begin(),
+                                              outiterator2);
                 else
                     std::cout << "ins bit parse error" << std::endl;
             }
             if (gate.name == "MUX")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
-                                ek);
+                    TFHEpp::HomMUX(*outcipher, *inscipher, *inbcipher,
+                                   *inacipher, ek);
                 });
             else
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomNMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
-                                ek);
+                    TFHEpp::HomNMUX(*outcipher, *inscipher, *inbcipher,
+                                    *inacipher, ek);
                 });
         }
     }
