@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
     const YosysJSONparser::ParsedBC BCnetlist(json);
 
     // Allocate vectors which holds ciphertexts
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherin(BCnetlist.input_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherout(BCnetlist.output_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherdffq(BCnetlist.DFF_Q_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherdffd(BCnetlist.DFF_D_vector.size());
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> cipherwire(BCnetlist.wire_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherin(BCnetlist.input_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherout(BCnetlist.output_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffq(BCnetlist.DFF_Q_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherdffd(BCnetlist.DFF_D_vector.size());
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> cipherwire(BCnetlist.wire_vector.size());
 
     // Read input ciphertexts
     {
@@ -42,15 +42,14 @@ int main(int argc, char *argv[])
         ar(cipherin);
     }
 
-    // To avoid stack limitation, GateKey should be allocated like this
-    std::unique_ptr<TFHEpp::GateKey> gk(new TFHEpp::GateKey());
+    TFHEpp::EvalKey ek;
 
     // reads the cloud key from file
     {
-        const std::string path = "./cloud.key";
-        std::ifstream ifs("./cloud.key", std::ios::in | std::ios::binary);
+        const std::string path = "./eval.key";
+        std::ifstream ifs("./eval.key", std::ios::in | std::ios::binary);
         cereal::PortableBinaryInputArchive ar(ifs);
-        gk->serialize(ar);
+        ek.serialize(ar);
     }
 
     // These hold infomations about a task network
@@ -59,14 +58,14 @@ int main(int argc, char *argv[])
     std::vector<tf::Task> gatetasknet(BCnetlist.gate_vector.size());
 
     // Initialize registers by 0
-    for (TFHEpp::TLWE<TFHEpp::lvl0param> &dffq : cipherdffq) TFHEpp::HomCONSTANTZERO(dffq);
+    for (TFHEpp::TLWE<TFHEpp::lvl1param> &dffq : cipherdffq) TFHEpp::HomCONSTANTZERO(dffq);
 
     // Generaete tasks for Cpp Taskflow
     for (int gate_index = 1; gate_index <= BCnetlist.gate_vector.size();
          gate_index++) {
         const YosysJSONparser::GateStruct &gate =
             BCnetlist.gate_vector[gate_index - 1];
-        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::iterator outcipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::iterator outcipher;
         {
             const std::vector<uint>::const_iterator outiterator =
                 std::find(BCnetlist.output_vector.begin(),
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
             else
                 std::cout << "output bit parse error" << std::endl;
         }
-        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inacipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator inacipher;
         {
             const std::vector<uint>::const_iterator outiterator0 =
                     std::find(BCnetlist.output_vector.begin(),
@@ -132,7 +131,7 @@ int main(int argc, char *argv[])
                 [=]() { TFHEpp::HomNOT(*outcipher, *inacipher); });
             continue;
         }
-        std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inbcipher;
+        std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator inbcipher;
         {
             const std::vector<uint>::const_iterator outiterator1 =
                 std::find(BCnetlist.output_vector.begin(),
@@ -168,36 +167,36 @@ int main(int argc, char *argv[])
         if (gate.name != "MUX" && gate.name != "NMUX") {
             // 2 input gates
             if (gate.name == "NAND")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomNAND(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomNAND(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "NOR")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomNOR(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomNOR(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "XNOR")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomXNOR(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomXNOR(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "AND")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomAND(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomAND(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "OR")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomOR(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomOR(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "XOR")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomXOR(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomXOR(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "ANDYN")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomANDYN(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomANDYN(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "ORYN")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
-                    TFHEpp::HomORYN(*outcipher, *inacipher, *inbcipher, *gk);
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
+                    TFHEpp::HomORYN(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else {
                 std::cout << "GATE PARSE ERROR" << std::endl;
@@ -207,7 +206,7 @@ int main(int argc, char *argv[])
         }
         else {
             // 3 input gate, MUX or NMUX
-            std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>>::const_iterator inscipher;
+            std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator inscipher;
             {
                 const std::vector<uint>::const_iterator outiterator2 =
                     std::find(BCnetlist.output_vector.begin(),
@@ -241,14 +240,14 @@ int main(int argc, char *argv[])
                     std::cout << "ins bit parse error" << std::endl;
             }
             if (gate.name == "MUX")
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
                     TFHEpp::HomMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
-                                *gk);
+                                ek);
                 });
             else
-                gatetasknet[gate_index - 1] = taskflow.emplace([=, &gk]() {
+                gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
                     TFHEpp::HomNMUX(*outcipher, *inscipher, *inbcipher, *inacipher,
-                                *gk);
+                                ek);
                 });
         }
     }

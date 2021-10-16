@@ -14,7 +14,7 @@ int main()
     };
 
     // read the 3 ciphertexts of the result
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> result;
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> result;
     {
         std::ifstream ifs{"result.data", std::ios::binary};
         cereal::PortableBinaryInputArchive ar(ifs);
@@ -22,7 +22,7 @@ int main()
     };
 
     // decrypt and print plaintext answer
-    std::vector<uint8_t> p = TFHEpp::bootsSymDecrypt<TFHEpp::lvl0param>(result, sk);
+    std::vector<uint8_t> p = TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
     int int_answer = 0;
     for (int i = 0; i < 17; i++) {
         int_answer += p[i] << i;

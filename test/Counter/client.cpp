@@ -10,7 +10,9 @@ int main()
 {
     // generate a random key
     std::unique_ptr<TFHEpp::SecretKey> sk(new TFHEpp::SecretKey);
-    std::unique_ptr<TFHEpp::GateKey> gk(new TFHEpp::GateKey(*sk));
+    TFHEpp::EvalKey ek;
+    ek.emplacebkfft<TFHEpp::lvl01param>(*sk);
+    ek.emplaceiksk<TFHEpp::lvl10param>(*sk);
 
     // export the secret key to file for later use
     {
@@ -21,9 +23,9 @@ int main()
 
     // export the cloud key to a file (for the cloud)
     {
-        std::ofstream ofs{"cloud.key", std::ios::binary};
+        std::ofstream ofs{"eval.key", std::ios::binary};
         cereal::PortableBinaryOutputArchive ar(ofs);
-        gk->serialize(ar);
+        ek.serialize(ar);
     };
 
     // generate encrypt the input
@@ -32,7 +34,7 @@ int main()
     std::cin >> plaintext;
     std::vector<uint8_t> p(6);
     for (int i = 0; i < 4; i++) p[i + 2] = (plaintext >> i) & 1;
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> ciphertext = TFHEpp::bootsSymEncrypt(p, *sk);
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> ciphertext = TFHEpp::bootsSymEncrypt(p, *sk);
 
     // export the 6 ciphertexts to a file (for the cloud)
     {

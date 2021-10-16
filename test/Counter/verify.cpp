@@ -14,7 +14,7 @@ int main()
     };
 
     // read the 3 ciphertexts of the result
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl0param>> result;
+    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> result;
     {
         std::ifstream ifs{"result.data", std::ios::binary};
         cereal::PortableBinaryInputArchive ar(ifs);
