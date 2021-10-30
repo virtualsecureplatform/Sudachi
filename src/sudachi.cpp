@@ -170,7 +170,8 @@ int main(int argc, char *argv[])
             else
                 std::cout << "in1 bit parse error :" << gate.in[1] << std::endl;
         }
-        if (gate.name != "MUX" && gate.name != "NMUX") {
+        const std::set<std::string> twoinputgates{"NAND","NOR","XNOR","AND","OR","XOR","ANDYN","ORYN"};
+        if (twoinputgates.find(gate.name) != twoinputgates.end()) {
             // 2 input gates
             if (gate.name == "NAND")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
