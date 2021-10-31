@@ -74,27 +74,34 @@ int main(int argc, char *argv[])
          gate_index++) {
         const YosysJSONparser::GateStruct &gate =
             BCnetlist.gate_vector[gate_index - 1];
-        const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::iterator outcipher =
-            outsearchiterator(gate.out, BCnetlist, cipherdffd, cipherwire,
-                              cipherout, "output");
-        const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
-            inacipher =
-                insearchiterator(gate.in[0], BCnetlist, cipherin, cipherdffq,
-                                 cipherwire, cipherout, "in0");
-
+        const std::set<std::string> in2out1gates{
+            "NAND", "NOR", "XNOR", "AND", "OR", "XOR", "ANDYN", "ORYN"};
+        const std::set<std::string> in3out1gates{
+            "MUX","NMUX"};
         if (gate.name == "NOT") {
             // 1 input gate
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::iterator outcipher =
+                outsearchiterator(gate.out, BCnetlist, cipherdffd, cipherwire,
+                                cipherout, "output");
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inacipher =
+                    insearchiterator(gate.in[0], BCnetlist, cipherin, cipherdffq,
+                                    cipherwire, cipherout, "in0");
             gatetasknet[gate_index - 1] = taskflow.emplace(
                 [=]() { TFHEpp::HomNOT(*outcipher, *inacipher); });
-            continue;
         }
-        const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
-            inbcipher =
-                insearchiterator(gate.in[1], BCnetlist, cipherin, cipherdffq,
-                                 cipherwire, cipherout, "in1");
-        const std::set<std::string> twoinputgates{
-            "NAND", "NOR", "XNOR", "AND", "OR", "XOR", "ANDYN", "ORYN"};
-        if (twoinputgates.find(gate.name) != twoinputgates.end()) {
+        else if (in2out1gates.find(gate.name) != in2out1gates.end()) {
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::iterator outcipher =
+                outsearchiterator(gate.out, BCnetlist, cipherdffd, cipherwire,
+                                cipherout, "output");
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inacipher =
+                    insearchiterator(gate.in[0], BCnetlist, cipherin, cipherdffq,
+                                    cipherwire, cipherout, "in0");
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inbcipher =
+                    insearchiterator(gate.in[1], BCnetlist, cipherin, cipherdffq,
+                                    cipherwire, cipherout, "in1");
             // 2 input gates
             if (gate.name == "NAND")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
@@ -131,11 +138,21 @@ int main(int argc, char *argv[])
             else {
                 std::cout << "GATE PARSE ERROR" << std::endl;
                 std::cout << gate.name << std::endl;
-                continue;
             }
         }
-        else {
+        else if(in3out1gates.find(gate.name) != in3out1gates.end()){
             // 3 input gate, MUX or NMUX
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::iterator outcipher =
+                outsearchiterator(gate.out, BCnetlist, cipherdffd, cipherwire,
+                                cipherout, "output");
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inacipher =
+                    insearchiterator(gate.in[0], BCnetlist, cipherin, cipherdffq,
+                                    cipherwire, cipherout, "in0");
+            const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
+                inbcipher =
+                    insearchiterator(gate.in[1], BCnetlist, cipherin, cipherdffq,
+                                    cipherwire, cipherout, "in1");
             const std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>>::const_iterator
                 inscipher =
                     insearchiterator(gate.in[2], BCnetlist, cipherin,
@@ -150,6 +167,9 @@ int main(int argc, char *argv[])
                     TFHEpp::HomNMUX(*outcipher, *inscipher, *inbcipher,
                                     *inacipher, ek);
                 });
+        }
+        else{
+            std::cout <<"GATE PARSE ERROR!"<<std::endl;
         }
     }
 
