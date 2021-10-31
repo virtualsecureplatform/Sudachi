@@ -33,11 +33,11 @@ int main()
     std::random_device seed_gen;
     std::default_random_engine engine(seed_gen());
     std::uniform_int_distribution<> inrand(0, (1 << bitwidth) - 1);
-    int ina = inrand(engine);
-    int inb = inrand(engine);
-    std::cout <<"A:"<< ina << std::endl;
-    std::cout <<"B:"<< inb << std::endl;
-    std::cout <<"A*B:" << ina * inb <<std::endl;
+    uint ina = inrand(engine);
+    uint inb = inrand(engine);
+    std::cout << "A:" << ina << std::endl;
+    std::cout << "B:" << inb << std::endl;
+    std::cout << "A*B:" << ina * inb << std::endl;
     std::vector<uint8_t> p(2 + 2 * bitwidth);
     for (int i = 0; i < 16; i++) p[i + 2] = (ina >> i) & 1;
     for (int i = 0; i < 16; i++) p[i + 2 + bitwidth] = (inb >> i) & 1;
