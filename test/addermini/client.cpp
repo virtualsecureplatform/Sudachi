@@ -8,6 +8,12 @@
 
 int main()
 {
+    #ifdef USE_M12
+    using P = TFHEpp::lvlMparam;
+    #else
+    using P = TFHEpp::lvl1param;
+    #endif
+
     // generate a random key
     std::unique_ptr<TFHEpp::SecretKey> sk(new TFHEpp::SecretKey);
     TFHEpp::EvalKey ek;
@@ -41,8 +47,8 @@ int main()
     std::vector<uint8_t> p(2 + 2 * bitwidth);
     for (int i = 0; i < bitwidth; i++) p[i + 2] = (ina >> i) & 1;
     for (int i = 0; i < bitwidth; i++) p[i + 2 + bitwidth] = (inb >> i) & 1;
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> ciphertext =
-        TFHEpp::bootsSymEncrypt(p, *sk);
+    std::vector<TFHEpp::TLWE<P>> ciphertext =
+        TFHEpp::bootsSymEncrypt<P>(p, *sk);
 
     // export the 2+2*bitwith ciphertexts to a file (for the cloud)
     {

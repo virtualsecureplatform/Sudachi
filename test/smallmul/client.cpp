@@ -34,7 +34,7 @@ int main()
     };
 
     // generate encrypt the input
-    constexpr uint bitwidth = 16;
+    constexpr uint bitwidth = 5;
     std::random_device seed_gen;
     std::default_random_engine engine(seed_gen());
     std::uniform_int_distribution<> inrand(0, (1 << bitwidth) - 1);

@@ -1,9 +1,9 @@
 [submodule "thirdparties/json"]
 	path = thirdparties/json
 	url = https://github.com/nlohmann/json
-[submodule "thirdparties/TFHEpp"]
-	path = thirdparties/TFHEpp
-	url = https://github.com/virtualsecureplatform/TFHEpp
 [submodule "thirdparties/taskflow"]
 	path = thirdparties/taskflow
 	url = https://github.com/taskflow/taskflow
+[submodule "thirdparties/oveus-tfhe"]
+	path = thirdparties/oveus-tfhe
+	url = https://github.com/axell-corp/oveus-tfhe

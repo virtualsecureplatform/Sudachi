@@ -7,6 +7,12 @@
 #include <tfhe++.hpp>
 int main()
 {
+    #ifdef USE_M12
+    using P = TFHEpp::lvlMparam;
+    #else
+    using P = TFHEpp::lvl1param;
+    #endif
+
     // reads the cloud key from file
     TFHEpp::SecretKey sk;
     {
@@ -16,7 +22,7 @@ int main()
     };
 
     // read the 3 ciphertexts of the result
-    std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> result;
+    std::vector<TFHEpp::TLWE<P>> result;
     {
         std::ifstream ifs{"result.data", std::ios::binary};
         cereal::PortableBinaryInputArchive ar(ifs);
@@ -25,7 +31,7 @@ int main()
 
     // decrypt and print plaintext answer
     std::vector<uint8_t> p =
-        TFHEpp::bootsSymDecrypt<TFHEpp::lvl1param>(result, sk);
+        TFHEpp::bootsSymDecrypt<P>(result, sk);
     uint32_t int_answer = 0;
     for (int i = 0; i < 32; i++) {
         int_answer += p[i] << i;
