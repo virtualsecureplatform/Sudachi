@@ -1,9 +1,9 @@
 import chisel3._
 
 class MulPort extends Bundle{
-    val a = Input(UInt(4.W))
-    val b = Input(UInt(4.W))
-    val out = Output(UInt(8.W))
+    val a = Input(UInt(8.W))
+    val b = Input(UInt(8.W))
+    val out = Output(UInt(16.W))
 }
 
 class Mul extends Module {

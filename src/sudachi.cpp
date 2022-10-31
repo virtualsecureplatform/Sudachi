@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     #endif
 
     // To see performance
-    std::chrono::system_clock::time_point start, end;
+    std::chrono::system_clock::time_point start, init, end;
     start = std::chrono::system_clock::now();
 
     // Parse JSON netlist
@@ -314,6 +314,7 @@ int main(int argc, char *argv[])
         number_of_clock = std::atoi(argv[1]);
     }
 
+    init = std::chrono::system_clock::now();
     // taskflow.dump(std::cout);
     std::cout << "Start Evalution" << std::endl;
     executor.run_n(taskflow, number_of_clock).wait();
@@ -342,8 +343,20 @@ int main(int argc, char *argv[])
 
     end = std::chrono::system_clock::now();
     double time = static_cast<double>(
+        std::chrono::duration_cast<std::chrono::microseconds>(init - start)
+            .count() /
+        1000.0);
+    printf("init time %lf[ms]\n", time);
+
+    time = static_cast<double>(
+        std::chrono::duration_cast<std::chrono::microseconds>(end - init)
+            .count() /
+        1000.0);
+    printf("run time %lf[ms]\n", time);
+
+    time = static_cast<double>(
         std::chrono::duration_cast<std::chrono::microseconds>(end - start)
             .count() /
         1000.0);
-    printf("cloud time %lf[ms]\n", time);
+    printf("total time %lf[ms]\n", time);
 }
