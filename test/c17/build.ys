@@ -1,0 +1,29 @@
+# read design 
+read_verilog verilog/c17.v
+
+# elaborate design hierarchy
+hierarchy -check -top c17
+
+# the high-level stuff
+proc; opt; fsm; opt; memory; opt
+
+# mapping to internal cell library
+techmap; opt
+
+# Extract Full/Half Adder. Order is important.
+extract_fa
+
+# mapping logic to gates.
+abc -g gates,MUX,NMUX,AOI3,OAI3
+
+# cleanup
+clean -purge
+
+# write synthesized design
+write_json circuit.json
+
+# Print statistics
+stat
+
+#check output circuit
+#show
