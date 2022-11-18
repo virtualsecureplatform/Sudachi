@@ -7,6 +7,10 @@ if(USE_M12)
 	add_compile_definitions(USE_M12)
 endif()
 
+if(USE_SPQLIOX_AARCH64)
+  add_compile_definitions(USE_SPQLIOX_AARCH64)
+endif()
+
 #For Taskflow
 find_package(Threads REQUIRED)
 # For OpenMP
