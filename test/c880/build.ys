@@ -20,7 +20,7 @@ abc -g gates,MUX,NMUX,AOI3,OAI3
 clean -purge
 
 # write synthesized design
-# write_json circuit.json
+write_json circuit.json
 
 # Print statistics
 stat
