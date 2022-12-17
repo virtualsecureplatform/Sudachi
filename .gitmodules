@@ -7,3 +7,6 @@
 [submodule "thirdparties/oveus-tfhe"]
 	path = thirdparties/oveus-tfhe
 	url = https://github.com/axell-corp/oveus-tfhe
+[submodule "test/aes/aes-verilog"]
+	path = test/aes/aes-verilog
+	url = https://github.com/virtualsecureplatform/aes-verilog.git
