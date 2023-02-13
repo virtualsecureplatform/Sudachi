@@ -1,0 +1,6 @@
+add_executable(fixed_aes_client client.cpp)
+target_link_libraries(fixed_aes_client tfhe++)
+file(COPY ../aes/aes-verilog/encrypt DESTINATION ./aes-verilog/)
+file(COPY build.ys DESTINATION .)
+file(COPY test.bash DESTINATION .)
+add_custom_command(TARGET fixed_aes_client PRE_BUILD COMMAND cd ${CMAKE_CURRENT_BINARY_DIR} && yosys build.ys)
