@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
     #else
     using P = TFHEpp::lvl1param;
     #endif
+    using iksP = TFHEpp::lvl10param;
+    using brP = TFHEpp::lvl01param;
 
     // To see performance
     std::chrono::system_clock::time_point start, init, end;
@@ -120,35 +122,35 @@ int main(int argc, char *argv[])
             // 2 input gates
             if (gate.name == "NAND")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomNAND<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomNAND<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "NOR")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomNOR<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomNOR<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "XNOR")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomXNOR<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomXNOR<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "AND")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomAND<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomAND<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "OR")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomOR<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomOR<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "XOR")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomXOR<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomXOR<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "ANDYN")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomANDYN<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomANDYN<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else if (gate.name == "ORYN")
                 gatetasknet[gate_index - 1] = taskflow.emplace([=, &ek]() {
-                    TFHEpp::HomORYN<P>(*outcipher, *inacipher, *inbcipher, ek);
+                    TFHEpp::HomORYN<iksP,brP,P::μ>(*outcipher, *inacipher, *inbcipher, ek);
                 });
             else {
                 std::cout << "GATE PARSE ERROR" << std::endl;

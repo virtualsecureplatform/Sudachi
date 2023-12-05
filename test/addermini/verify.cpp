@@ -32,7 +32,8 @@ int main()
         TFHEpp::bootsSymDecrypt<P>(result, sk);
     int int_answer = 0;
     for (int i = 0; i < 17; i++) {
-        int_answer += p[i] << i;
+        int_answer += static_cast<int>(p[i]) << i;
     }
     std::cout << int_answer << std::endl;
+    std::cout << std::bitset<17>(int_answer) << std::endl;
 }

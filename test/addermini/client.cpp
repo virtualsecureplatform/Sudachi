@@ -44,6 +44,7 @@ int main()
     std::cout << "A:" << ina << std::endl;
     std::cout << "B:" << inb << std::endl;
     std::cout << "A+B:" << ina + inb << std::endl;
+    std::cout << "A+B:" << std::bitset<bitwidth+1>(ina + inb) << std::endl;
     std::vector<uint8_t> p(2 + 2 * bitwidth);
     for (int i = 0; i < bitwidth; i++) p[i + 2] = (ina >> i) & 1;
     for (int i = 0; i < bitwidth; i++) p[i + 2 + bitwidth] = (inb >> i) & 1;
