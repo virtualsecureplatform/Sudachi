@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     std::default_random_engine engine(seed_gen());
 
     constexpr uint bitwidth = 4*4*32;
-    std::array<uint8_t,bitwidth> p;
+    std::array<uint8_t> p(bitwidth);
     for (int i = 0; i < 4; i++) for(int j = 0; j < 4; j++) for(int k = 0; k < 32; k++) p[i*4*32+j*32+k] = (reinterpret_cast<uint32_t&>(in_img[i][j])>>k) & 1;
     std::cout<<std::endl;
 

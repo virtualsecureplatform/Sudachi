@@ -36,11 +36,11 @@ int main(int argc, char** argv)
     std::uniform_int_distribution<uint8_t> inrand(0, (1 << bitwidth) - 1);
 
     const uint8_t in = inrand(engine);
-    std::array<uint8_t,bitwidth> p;
+    std::vector<uint8_t> p(bitwidth);
     for (int i = 0; i < bitwidth; i++) p[i] = (in>>i) & 1;
 
     std::vector<TFHEpp::TLWE<TFHEpp::lvl1param>> ciphertext =
-        TFHEpp::bootsSymEncrypt(p, *sk);
+        TFHEpp::bootsSymEncrypt<TFHEpp::lvl1param>(p, *sk);
 
     // export the 2+2*bitwith ciphertexts to a file (for the cloud)
     {
