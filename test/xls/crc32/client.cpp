@@ -4,7 +4,6 @@
 #include <memory>
 #include <random>
 #include <tfhe++.hpp>
-#include <ggpinreal.hpp>
 #include <vector>
 
 int main(int argc, char** argv)

@@ -43,13 +43,6 @@ int main(int argc, char** argv)
         ek.serialize(ar);
     };
 
-    GGPinReal::IOlabels iolabels;
-    {
-        std::ifstream ifs("iolabels.data", std::ios::binary);
-        cereal::PortableBinaryInputArchive ar(ifs);
-        ar(iolabels);
-    }
-
     // generate encrypt the input
     std::array<std::array<float, 4>,4> in_img;
     in_img[0][0] = 1;
