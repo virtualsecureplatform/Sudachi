@@ -1,0 +1,26 @@
+# read design 
+read_verilog sobel_filter.v wrapper.v
+
+# elaborate design hierarchy
+hierarchy -check -top wrapper
+
+# the high-level stuff
+proc; opt; fsm; opt; memory; opt; flatten
+
+# mapping to internal cell library
+techmap; opt
+
+# mapping logic to gates.
+abc -g gates
+
+# cleanup
+clean -purge
+
+# write synthesized design
+write_json circuit.json
+
+# Print statistics
+stat
+
+#check output circuit
+#show

@@ -1,0 +1,17 @@
+set(CIRCUIT "crc32")
+
+add_executable(${CIRCUIT}_client client.cpp)
+# find_package(verilator)
+# verilate(${CIRCUIT}_client SOURCES verilog/${CIRCUIT}.v)
+target_include_directories(${CIRCUIT}_client PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/thirdparties/TFHEpp/include ${PROJECT_SOURCE_DIR}/thirdparties/taskflow ${PROJECT_SOURCE_DIR}/thirdparties/json/single_include)
+# file(COPY ${PROJECT_SOURCE_DIR}/thirdparties/xls/xls/examples/${CIRCUIT}.x DESTINATION .)
+# file(COPY xls.bash DESTINATION .)
+file(COPY ${CIRCUIT}.v DESTINATION .)
+file(COPY build.ys DESTINATION .)
+file(COPY test.bash DESTINATION .)
+add_custom_command(TARGET ${CIRCUIT}_client PRE_BUILD COMMAND cd ${CMAKE_CURRENT_BINARY_DIR} && yosys build.ys)
+target_link_libraries(${CIRCUIT}_client PRIVATE tfhe++ Threads::Threads)
+
+# add_executable(${CIRCUIT}_verify verify.cpp)
+# target_include_directories(${CIRCUIT}_verify PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/thirdparties/TFHEpp/include ${PROJECT_SOURCE_DIR}/thirdparties/taskflow ${PROJECT_SOURCE_DIR}/thirdparties/json/single_include)
+# target_link_libraries(${CIRCUIT}_verify PRIVATE tfhe++ Threads::Threads)
