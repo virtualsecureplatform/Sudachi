@@ -14,7 +14,3 @@ SUBDIRLIST(test_directories ${CMAKE_CURRENT_LIST_DIR})
 foreach(test_directory ${test_directories})
     add_subdirectory(${test_directory})
 endforeach(test_directory ${test_directories})
-
-add_subdirectory(xls/crc32)
-add_subdirectory(xls/riscv_simple)
-add_subdirectory(xls/sobel_filter)
