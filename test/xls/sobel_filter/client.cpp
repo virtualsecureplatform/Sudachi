@@ -49,7 +49,6 @@ int main(int argc, char** argv)
         cereal::PortableBinaryInputArchive ar(ifs);
         ar(iolabels);
     }
-    init = std::chrono::system_clock::now();
 
     // generate encrypt the input
     std::array<std::array<float, 4>,4> in_img;
