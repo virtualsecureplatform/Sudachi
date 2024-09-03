@@ -3,6 +3,7 @@
 package mini
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
 
 object Control {
@@ -167,5 +168,5 @@ class Control extends Module {
 }
 
 object ControlTop extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Control())
+  ChiselStage.emitSystemVerilogFile(new Control(),args = Array("-td", "."),firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"))
 }

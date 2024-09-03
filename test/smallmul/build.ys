@@ -1,5 +1,5 @@
 # read design 
-read_verilog Mul.v
+read_verilog Mul.sv
 
 # elaborate design hierarchy
 hierarchy -check -top Mul

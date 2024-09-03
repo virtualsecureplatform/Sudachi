@@ -1,5 +1,5 @@
 import chisel3._
-// import Counter._
+import circt.stage.ChiselStage
 
 // Problem:
 //
@@ -20,5 +20,5 @@ class Counter extends Module {
 }
 
 object CounterTop extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Counter())
+  ChiselStage.emitSystemVerilogFile(new Counter(),args = Array("-td", "."),firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"))
 }

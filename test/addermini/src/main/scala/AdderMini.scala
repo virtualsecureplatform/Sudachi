@@ -1,4 +1,5 @@
 import chisel3._
+import circt.stage.ChiselStage
 
 class AdderMiniPort extends Bundle {
   val in_a = Input(UInt(16.W))
@@ -13,5 +14,5 @@ class AdderMini extends Module {
 }
 
 object AdderMiniTop extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new AdderMini())
+  ChiselStage.emitSystemVerilogFile(new AdderMini(),args = Array("-td", "."),firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"))
 }

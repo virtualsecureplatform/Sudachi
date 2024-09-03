@@ -1,4 +1,5 @@
 import chisel3._
+import circt.stage.ChiselStage
 
 class MulPort extends Bundle{
     val a = Input(UInt(16.W))
@@ -14,5 +15,5 @@ class Mul extends Module {
 }
 
 object Elaborate extends App {
-  chisel3.Driver.execute(args, () => new Mul())
+  ChiselStage.emitSystemVerilogFile(new Mul(),args = Array("-td", "."),firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"))
 }

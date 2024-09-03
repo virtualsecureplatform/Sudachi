@@ -1,5 +1,5 @@
 # read design 
-read_verilog Counter.v
+read_verilog Counter.sv
 
 # elaborate design hierarchy
 hierarchy -check -top Counter

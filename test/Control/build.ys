@@ -1,5 +1,5 @@
 # read design 
-read_verilog Control.v
+read_verilog Control.sv
 
 # elaborate design hierarchy
 hierarchy -check -top Control
