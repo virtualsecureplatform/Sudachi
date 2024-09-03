@@ -2,4 +2,4 @@
 echo "run client"
 ./c17_client
 echo "run Sudachi"
-../../src/sudachi
+../../../src/sudachi
